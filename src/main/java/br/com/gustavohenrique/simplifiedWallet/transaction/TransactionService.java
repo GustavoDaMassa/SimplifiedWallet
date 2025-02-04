@@ -1,7 +1,7 @@
 package br.com.gustavohenrique.simplifiedWallet.transaction;
 
 import br.com.gustavohenrique.simplifiedWallet.authorization.AuthorizationService;
-import br.com.gustavohenrique.simplifiedWallet.exception.InvalidTransctionException;
+import br.com.gustavohenrique.simplifiedWallet.notification.NoticationService;
 import br.com.gustavohenrique.simplifiedWallet.wallet.Wallet;
 import br.com.gustavohenrique.simplifiedWallet.wallet.WalletRepository;
 import br.com.gustavohenrique.simplifiedWallet.wallet.WalletType;
@@ -14,11 +14,13 @@ public class TransactionService {
     private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
     private final AuthorizationService authorizationService;
+    private  final NoticationService noticationService;
 
-    public TransactionService(TransactionRepository transactionRepository, WalletRepository walletRepository,AuthorizationService authorizationService ) {
+    public TransactionService(TransactionRepository transactionRepository, WalletRepository walletRepository,AuthorizationService authorizationService, NoticationService noticationService ) {
         this.transactionRepository = transactionRepository;
         this.walletRepository = walletRepository;
         this.authorizationService = authorizationService;
+        this.noticationService = noticationService;
     }
 
     @Transactional
@@ -32,6 +34,8 @@ public class TransactionService {
         walletRepository.save(wallet.debit(transaction.value()));
 
         authorizationService.authorize(transaction);
+
+        noticationService.notify(transaction);
 
         return newTransaction;
     }
