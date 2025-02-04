@@ -1,5 +1,6 @@
 package br.com.gustavohenrique.simplifiedWallet.transaction;
 
+import br.com.gustavohenrique.simplifiedWallet.authorization.AuthorizationService;
 import br.com.gustavohenrique.simplifiedWallet.exception.InvalidTransctionException;
 import br.com.gustavohenrique.simplifiedWallet.wallet.Wallet;
 import br.com.gustavohenrique.simplifiedWallet.wallet.WalletRepository;
@@ -12,10 +13,12 @@ public class TransactionService {
 
     private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
+    private final AuthorizationService authorizationService;
 
-    public TransactionService(TransactionRepository transactionRepository, WalletRepository walletRepository) {
+    public TransactionService(TransactionRepository transactionRepository, WalletRepository walletRepository,AuthorizationService authorizationService ) {
         this.transactionRepository = transactionRepository;
         this.walletRepository = walletRepository;
+        this.authorizationService = authorizationService;
     }
 
     @Transactional
@@ -25,9 +28,10 @@ public class TransactionService {
 
         Transaction newTransaction = transactionRepository.save(transaction);
 
-        var wallet = walletRepository.findById(transaction.payer()).orElseThrow();
+        var wallet = walletRepository.findById(transaction.payer()).orElseThrow( () -> new InvalidTransctionException("Payer not found"));
         walletRepository.save(wallet.debit(transaction.value()));
 
+        authorizationService.authorize(transaction);
 
         return newTransaction;
     }
