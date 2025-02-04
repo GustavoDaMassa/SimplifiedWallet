@@ -1,9 +1,11 @@
 package br.com.gustavohenrique.simplifiedWallet.transaction;
 
+import br.com.gustavohenrique.simplifiedWallet.exception.InvalidTransctionException;
 import br.com.gustavohenrique.simplifiedWallet.wallet.Wallet;
 import br.com.gustavohenrique.simplifiedWallet.wallet.WalletRepository;
 import br.com.gustavohenrique.simplifiedWallet.wallet.WalletType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TransactionService {
@@ -16,7 +18,10 @@ public class TransactionService {
         this.walletRepository = walletRepository;
     }
 
+    @Transactional
     public Transaction create(Transaction transaction){
+
+        validate(transaction);
 
         Transaction newTransaction = transactionRepository.save(transaction);
 
@@ -28,7 +33,7 @@ public class TransactionService {
     }
 
     private void validate(Transaction transaction){
-        walletRepository.findById(transaction.payee()).map(payee -> walletRepository.findById(transaction.payer()).map(payer -> isTransactionValid(transaction, payer) ? transaction : null ).orElseThrow()).orElseThrow();
+        walletRepository.findById(transaction.payee()).map(payee -> walletRepository.findById(transaction.payer()).map(payer -> isTransactionValid(transaction, payer) ? transaction : null ).orElseThrow( () -> new InvalidTransctionException(" Invalid Transaction - %s".formatted(transaction)))).orElseThrow(() -> new InvalidTransctionException(" Invalid Transaction - %s".formatted(transaction)));
     }
 
     private boolean isTransactionValid(Transaction transaction, Wallet payer){
