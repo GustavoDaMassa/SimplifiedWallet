@@ -8,6 +8,8 @@ import br.com.gustavohenrique.simplifiedWallet.wallet.WalletType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class TransactionService {
 
@@ -46,6 +48,10 @@ public class TransactionService {
 
     private boolean isTransactionValid(Transaction transaction, Wallet payer){
         return  payer.type() == WalletType.COMUM.getValue() && payer.balance().compareTo(transaction.value()) >= 0 && !payer.id().equals(transaction.payee());
+    }
+
+    public List<Transaction> showTransactions(){
+        return transactionRepository.findAll();
     }
 }
 
