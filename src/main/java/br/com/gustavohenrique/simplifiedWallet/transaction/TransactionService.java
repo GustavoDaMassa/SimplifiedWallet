@@ -32,8 +32,10 @@ public class TransactionService {
 
         Transaction newTransaction = transactionRepository.save(transaction);
 
-        var wallet = walletRepository.findById(transaction.payer()).orElseThrow( () -> new InvalidTransctionException("Payer not found"));
-        walletRepository.save(wallet.debit(transaction.value()));
+        var walletPayer= walletRepository.findById(transaction.payer()).orElseThrow( () -> new InvalidTransctionException("Payer not found"));
+        var walletPayee= walletRepository.findById(transaction.payee()).orElseThrow( () -> new InvalidTransctionException("Payee not found"));
+        walletRepository.save(walletPayer.debit(transaction.value()));
+        walletRepository.save(walletPayee.credit(transaction.value()));
 
         authorizationService.authorize(transaction);
 
