@@ -1,7 +1,7 @@
 package br.com.gustavohenrique.simplifiedWallet.transaction;
 
-public class InvalidTransctionException extends RuntimeException {
-    public InvalidTransctionException(String message) {
+public class InvalidTransactionException extends RuntimeException {
+    public InvalidTransactionException(String message) {
         super(message);
     }
 }
