@@ -6,6 +6,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class NoticationService {
 
-    public void notify(Transaction transaction){}
+    private final NotificationProducer notificationProducer;
+
+    public NoticationService(NotificationProducer notificationProducer) {
+        this.notificationProducer = notificationProducer;
+    }
+
+
+    public void notify(Transaction transaction){
+        notificationProducer.sendNotification(transaction);
+    }
 
 }
