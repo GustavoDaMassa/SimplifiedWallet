@@ -18,7 +18,8 @@ public class NotificationConsumer {
     public void receiveNotification(Transaction transaction){
         var response = restClient.get().retrieve().toEntity(Notification.class);
 
-        if(response.getStatusCode().isError() || !response.getBody().message()) throw new NotificationException("Error send notification");
+        if(response.getStatusCode().isError() || !response.getBody().message())
+            throw new NotificationException("Error send notification");
     }
 
 }

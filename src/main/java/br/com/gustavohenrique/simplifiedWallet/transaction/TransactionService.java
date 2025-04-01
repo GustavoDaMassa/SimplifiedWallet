@@ -18,7 +18,8 @@ public class TransactionService {
     private final AuthorizationService authorizationService;
     private  final NoticationService noticationService;
 
-    public TransactionService(TransactionRepository transactionRepository, WalletRepository walletRepository,AuthorizationService authorizationService, NoticationService noticationService ) {
+    public TransactionService(TransactionRepository transactionRepository, WalletRepository walletRepository,
+                              AuthorizationService authorizationService, NoticationService noticationService ) {
         this.transactionRepository = transactionRepository;
         this.walletRepository = walletRepository;
         this.authorizationService = authorizationService;
@@ -32,8 +33,10 @@ public class TransactionService {
 
         Transaction newTransaction = transactionRepository.save(transaction);
 
-        var walletPayer= walletRepository.findById(transaction.payer()).orElseThrow( () -> new InvalidTransactionException("Payer not found"));
-        var walletPayee= walletRepository.findById(transaction.payee()).orElseThrow( () -> new InvalidTransactionException("Payee not found"));
+        var walletPayer= walletRepository.findById(transaction.payer()).orElseThrow( () ->
+                new InvalidTransactionException("Payer not found"));
+        var walletPayee= walletRepository.findById(transaction.payee()).orElseThrow( () ->
+                new InvalidTransactionException("Payee not found"));
         walletRepository.save(walletPayer.debit(transaction.amount()));
         walletRepository.save(walletPayee.credit(transaction.amount()));
 
@@ -44,16 +47,21 @@ public class TransactionService {
         return newTransaction;
     }
 
+    public List<Transaction> showTransactions(){
+        return transactionRepository.findAll();
+    }
+
     private void validate(Transaction transaction){
-        walletRepository.findById(transaction.payee()).map(payee -> walletRepository.findById(transaction.payer()).map(payer -> isTransactionValid(transaction, payer) ? transaction : null ).orElseThrow( () -> new InvalidTransactionException(" Invalid Transaction - %s".formatted(transaction)))).orElseThrow(() -> new InvalidTransactionException(" Invalid Transaction - %s".formatted(transaction)));
+        walletRepository.findById(transaction.payee()).map(payee -> walletRepository
+                .findById(transaction.payer()).map(payer -> isTransactionValid(transaction, payer)
+                        ? transaction : null ).orElseThrow( () -> new InvalidTransactionException((" Invalid Transaction " +
+                        "- %s").formatted(transaction)))).orElseThrow(() -> new InvalidTransactionException((" " +
+                "Invalid Transaction - %s").formatted(transaction)));
     }
 
     private boolean isTransactionValid(Transaction transaction, Wallet payer){
-        return  payer.type() == WalletType.COMUM.getValue() && payer.balance().compareTo(transaction.amount()) >= 0 && !payer.id().equals(transaction.payee());
-    }
-
-    public List<Transaction> showTransactions(){
-        return transactionRepository.findAll();
+        return  payer.type() == WalletType.COMUM.getValue() && payer.balance()
+                .compareTo(transaction.amount()) >= 0 && !payer.id().equals(transaction.payee());
     }
 }
 
